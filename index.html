@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Roll</title>
+    <style>
+      #score {
+        font-family: sans-serif;
+        font-size: 2em;
+      }
+      #canvas {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="score">test</div>
+    <canvas id="canvas"></canvas>
+    <script>
+      var score = document.getElementById('score');
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d');
+      var firstFrameDate = new Date();
+      var lastFrameDate = firstFrameDate;
+      var rows = [-1, -1, -1, -1, 2];
+      var row = 0;
+      var yy = 0;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var clicked = false;
+      var lost = false;
+      (function update() {
+        // Delta
+        var frameDate = new Date();
+        var delta = (frameDate - lastFrameDate) / 1000;
+        lastFrameDate = frameDate;
+        score.innerText = frameDate - firstFrameDate;
+        // Draw
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < rows.length; ++i)
+          ctx.fillRect(
+            Math.floor(rows[(row + i) % rows.length] * canvas.width / 4),
+            Math.floor(yy + (3 - i) * canvas.height / 4),
+            Math.floor(canvas.width / 4),
+            Math.floor(canvas.height / 4.2)
+          );
+        // Advance
+        yy += 500 * delta;
+        while (yy > canvas.height / 4) {
+          yy -= canvas.height / 4;
+          var ignore = rows[row] == -1;
+          rows[row % rows.length] = Math.floor(Math.random() * 4);
+          row += 1;
+          if (!clicked && !ignore)
+            lost = true;
+          clicked = false;
+        }
+        // Loop
+        if (!lost)
+          window.requestAnimationFrame(arguments.callee);
+      })();
+      canvas.addEventListener('click', function onTouch(e) {
+        clicked = Math.floor(e.clientX * 4 / canvas.width) == rows[row];
+        if (!clicked)
+          lost = true;
+      }, false);
+    </script>
+  </body>
+</html>
