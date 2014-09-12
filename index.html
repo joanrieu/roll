@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
     <title>Roll</title>
     <style>
+      @-webkit-keyframes pulseText {
+        from { text-shadow: 0 0 .1em blue; }
+        25% { text-shadow: 0 0 .1em yellow; }
+        50 { text-shadow: 0 0 .1em purple; }
+        75% { text-shadow: 0 0 .1em red; }
+        to { text-shadow: 0 0 .1em blue; }
+      }
+      @-webkit-keyframes pulseBox {
+        from { box-shadow: 0 0 1em blue; }
+        25% { box-shadow: 0 0 1em yellow; }
+        50 { box-shadow: 0 0 1em purple; }
+        75% { box-shadow: 0 0 1em red; }
+        to { box-shadow: 0 0 1em blue; }
+      }
       #score {
         position: relative;
         color: white;
@@ -25,7 +39,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: rgba(255, 255, 255, .1);
+        background-color: rgba(0, 0, 0, .5);
       }
       #play div {
         position: absolute;
@@ -33,9 +47,9 @@
         left: 5%;
         right: 5%;
         padding: 10%;
-        box-shadow: 0 0 1em black;
+        border-radius: 5%;
         text-align: center;
-        background-color: rgba(255, 255, 255, .2);
+        background-color: rgba(0, 0, 0, .5);
       }
       #play h1 {
         margin: 10%;
@@ -50,12 +64,22 @@
       #play button {
         margin: 10%;
         border: 0 none;
-        color: white;
+        color: rgba(255, 255, 255, .5);
         background-color: transparent;
         font-size: 4em;
       }
       #play button:focus {
         outline: 0;
+      }
+      #play div {
+        -webkit-animation-name: pulseBox;
+        -webkit-animation-duration: 5s;
+        -webkit-animation-iteration-count: infinite;
+      }
+      #play h1, #play button {
+        -webkit-animation-name: pulseText;
+        -webkit-animation-duration: 5s;
+        -webkit-animation-iteration-count: infinite;
       }
     </style>
   </head>
