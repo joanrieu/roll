@@ -6,8 +6,11 @@
     <title>Roll</title>
     <style>
       #score {
-        font-family: sans-serif;
+        position: relative;
+        color: white;
+        font-family: monospace;
         font-size: 2em;
+        text-shadow: 0 0 .5em white, 0 0 .2em black;
       }
       #canvas {
         position: absolute;
@@ -15,57 +18,134 @@
         bottom: 0;
         left: 0;
         right: 0;
+        box-shadow: inset 0 5em 10em -5em black;
+        background-color: #222;
+      }
+      #play {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(255, 255, 255, .1);
+      }
+      #play div {
+        position: absolute;
+        bottom: 15%;
+        left: 5%;
+        right: 5%;
+        padding: 10%;
+        box-shadow: 0 0 1em black;
+        text-align: center;
+        background-color: rgba(255, 255, 255, .2);
+      }
+      #play h1 {
+        margin: 10%;
+        color: white;
+        font-family: sans-serif;
+        font-size: 5em;
+      }
+      #play p {
+        color: white;
+        font-family: sans-serif;
+      }
+      #play button {
+        width: 80%;
+        margin: 10%;
+        border: .1em solid white;
+        color: white;
+        background-color: transparent;
+        font-size: 4em;
       }
     </style>
   </head>
   <body>
-    <div id="score">test</div>
     <canvas id="canvas"></canvas>
+    <div id="score"></div>
+    <div id="play">
+      <div>
+        <h1>Roll</h1>
+        <p>Tap the bubbles before they reach the bottom.</p>
+        <button id="playBtn">Play!</button>
+      </div>
+    </div>
     <script>
-      var score = document.getElementById('score');
-      var canvas = document.getElementById('canvas');
+      var $score = document.getElementById('score');
+      var $canvas = document.getElementById('canvas');
       var ctx = canvas.getContext('2d');
-      var firstFrameDate = new Date();
-      var lastFrameDate = firstFrameDate;
-      var rows = [-1, -1, -1, -1, 2];
-      var row = 0;
-      var yy = 0;
-      var clicks = [];
-      var lost = false;
-      (function update() {
-        // Delta
-        var frameDate = new Date();
-        var delta = (frameDate - lastFrameDate) / 1000;
-        lastFrameDate = frameDate;
-        score.innerText = frameDate - firstFrameDate;
-        // Draw
+      var gS = {};
+      function setup() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+      }
+      function home() {
+        document.getElementById('play').style.display = 'block';
+        document.getElementById('playBtn').focus();
+      }
+      function start() {
+        gS.firstFrameDate = new Date();
+        gS.lastFrameDate = gS.firstFrameDate;
+        gS.rows = [-1, -1, -1, -1, 2];
+        gS.row = 0;
+        gS.yy = 0;
+        gS.clicks = [];
+        gS.lost = false;
+        gS.colors = [ 'blue', 'yellow', 'purple', 'red' ];
+        update();
+      }
+      function update() {
+        // Delta
+        var frameDate = new Date();
+        var delta = (frameDate - gS.lastFrameDate) / 1000;
+        gS.lastFrameDate = frameDate;
+        $score.innerText = frameDate - gS.firstFrameDate;
+        // Draw
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (var i = 0; i < rows.length; ++i)
-          ctx.fillRect(
-            Math.floor(rows[(row + i) % rows.length] * canvas.width / 4),
-            Math.floor((yy + 3 - i) * canvas.height / 4),
-            Math.floor(canvas.width / 4),
-            Math.floor(canvas.height / 4.2)
+        for (var i = 0; i < gS.rows.length; ++i) {
+          var col = gS.rows[(gS.row + i) % gS.rows.length];
+          ctx.fillStyle = gS.colors[col];
+          ctx.strokeStyle = 'white';
+          ctx.beginPath();
+          ctx.arc(
+            Math.floor((col + .5) * canvas.width / 4),
+            Math.floor((gS.yy + 3.5 - i) * canvas.height / 4),
+            Math.floor(canvas.width / 10),
+            0,
+            2 * Math.PI
           );
+          ctx.fill();
+          ctx.stroke();
+        }
         // Advance
-        yy += 500 * delta / canvas.height * 4; // FIXME
-        while (yy > 1) {
-          yy -= 1;
-          var ignore = rows[row % rows.length] == -1;
+        gS.yy += 3 * delta; // FIXME
+        while (gS.yy > 1) {
+          gS.yy -= 1;
+          var ignore = gS.rows[gS.row % gS.rows.length] == -1;
           if (!ignore)
-            lost = clicks.shift() != rows[row % rows.length];
-          rows[row % rows.length] = Math.floor(Math.random() * 4);
-          row += 1;
+            gS.lost = gS.clicks.shift() != gS.rows[gS.row % gS.rows.length];
+          gS.rows[gS.row % gS.rows.length] = Math.floor(Math.random() * 4);
+          gS.row += 1;
         }
         // Loop
-        if (!lost)
+        if (gS.lost)
+          home();
+        else
           window.requestAnimationFrame(arguments.callee);
-      })();
+      }
       canvas.addEventListener('click', function onTouch(e) {
-        clicks.push(Math.floor(e.clientX * 4 / canvas.width));
+        gS.clicks.push(Math.floor(e.clientX * 4 / canvas.width));
       }, false);
+      window.addEventListener('resize', function() {
+        setup();
+      });
+      (function (btn) {
+        btn.addEventListener('click', function() {
+          document.getElementById('play').style.display = 'none';
+          start();
+        });
+        btn.focus();
+      })(document.getElementById('playBtn'));
+      setup();
     </script>
   </body>
 </html>
